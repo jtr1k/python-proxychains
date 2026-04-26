@@ -8,7 +8,9 @@ authors = [
     { name = "jtr1k", email = "jtr1k.mail@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pydantic>=2.13.3",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.7,<0.12.0"]
@@ -19,3 +21,11 @@ dev = [
     "coverage>=7.13.5",
     "pytest>=9.0.3",
 ]
+
+[tool.black]
+line-length = 88
+target-version = ["py314"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
