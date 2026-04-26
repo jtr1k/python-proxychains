@@ -1,6 +1,8 @@
-from requests.adapters import HTTPAdapter
-from .router import Router
 from requests import PreparedRequest, Response
+from requests.adapters import HTTPAdapter
+
+from .router import Router
+
 
 class RoutingProxyAdapter(HTTPAdapter):
 
@@ -11,8 +13,5 @@ class RoutingProxyAdapter(HTTPAdapter):
 
         proxy = router.get_proxy(request.url).url
 
-        kwargs["proxies"] = {
-                "https://" : proxy
-                "http://" : proxy
-        }
+        kwargs["proxies"] = {"https://": proxy, "http://": proxy}
         return super().send(request, **kwargs)

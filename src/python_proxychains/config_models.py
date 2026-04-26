@@ -2,8 +2,15 @@ import re
 from enum import Enum
 from typing import Annotated, List, Optional, Pattern
 
-from pydantic import AnyUrl, BaseModel, BeforeValidator, ValidationError
+from pydantic import (
+    AnyUrl,
+    BaseModel,
+    BeforeValidator,
+    ValidationError,
+    model_validator,
+)
 from pydantic_extra_types.country import CountryAlpha2
+
 
 class LogLevelEnum(str, Enum):
     none = "none"
@@ -66,3 +73,30 @@ class ConfigModel(BaseModel):
     routing: List[RoutingRule]
     proxies: List[Proxy]
     pools: List[ProxyPoolModel]
+
+    @model_validator(mode="after")
+    def finalize_config(value: ConfigModel) -> ConfigModel:
+        proxy_tags = {i.tag for i in value.proxies}
+
+        for pool in value.pools:
+            for tag in pool.proxies:
+                if tag not in proxy_tags:
+                    raise ValueError(
+                        f"ProxyPool {pool.tag} references a non-existent proxy {tag}"
+                    )
+
+        pool_tags = {i.tag for i in value.pools}
+
+        for proxy in value.proxies:
+            if proxy.tag in pool_tags:
+                raise ValueError(f"Name collision of proxy and pool {proxy.tag}")
+
+            value.pools.append(
+                ProxyPoolModel(
+                    tag=proxy.tag,
+                    proxies=[proxy.tag],
+                    strategy=PoolStrategyEnum.round_robin,
+                )
+            )
+
+        return value

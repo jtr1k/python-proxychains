@@ -1,5 +1,6 @@
 from .config import Config, Proxy
 
+
 class Router:
     def __init__(self):
         pass
