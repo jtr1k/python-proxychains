@@ -1,0 +1,43 @@
+{
+    "log": {
+        "loglevel": "info"
+    },
+    "routing": [
+        {
+            "domain": [
+                "*.ru"
+            ],
+            "outbound": "direct"
+        }
+    ],
+    "proxies": [
+        {
+            "tag": "proxy1",
+            "protocol": "socks5",
+            "url": "socks5://localhost:10808"
+        },
+        {
+            "tag": "proxy2",
+            "protocol": "socks5",
+            "url": "socks5://localhost:10807"
+        },
+        {
+            "tag": "direct",
+            "protocol": "freedom"
+        },
+        {
+            "tag": "block",
+            "protocol": "blackhole"
+        }
+    ],
+    "pools": [
+        {
+            "tag": "pool1",
+            "proxies": [
+                "proxy1",
+                "proxy2"
+            ],
+            "strategy": "RoundRobin"
+        }
+    ]
+}
