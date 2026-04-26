@@ -8,6 +8,13 @@
                 ".*\\.ru"
             ],
             "outbound": "direct"
+        },
+        {
+            "geoip": [
+                "ru",
+                "by"
+            ],
+            "outbound": "direct"
         }
     ],
     "proxies": [

@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Annotated, List, Optional, Pattern
 
 from pydantic import AnyUrl, BaseModel, BeforeValidator, ValidationError
-
+from pydantic_extra_types.country import CountryAlpha2
 
 class LogLevelEnum(str, Enum):
     none = "none"
@@ -31,7 +31,8 @@ CompiledRegex = Annotated[Pattern[str], BeforeValidator(compile_regex)]
 
 
 class RoutingRule(BaseModel):
-    domain: List[CompiledRegex]
+    domain: Optional[List[CompiledRegex]] = None
+    geoip: Optional[List[CountryAlpha2]] = None
     outbound: str
 
 
