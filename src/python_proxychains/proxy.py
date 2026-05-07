@@ -1,33 +1,55 @@
-from .config_models import Proxy, ProxyStrategyModel
+import random
+from typing import List
+
+from .config_models import PoolStrategyEnum, Proxy, ProxyPoolModel
+
 
 class ProxyStrategy:
     def __init__(self, proxies: List[Proxy]):
+        if not proxies:
+            raise ValueError("Proxy list is empty")
         self.proxies = proxies
 
+    def get_proxy(self) -> Proxy:
+        raise NotImplementedError
+
+
 class Random(ProxyStrategy):
-    def get_proxy():
+    def get_proxy(self) -> Proxy:
         return random.choice(self.proxies)
 
-class RoundRobin(ProxyStrategyModel):
-    def __init__(self, proxies):
-        self.index = 0
-        super().__init__(proxies)
 
-    def get_proxy():
+class RoundRobin(ProxyStrategy):
+    def __init__(self, proxies: List[Proxy]):
+        super().__init__(proxies)
+        self.index = 0
+
+    def get_proxy(self) -> Proxy:
+        proxy = self.proxies[self.index]
         self.index = (self.index + 1) % len(self.proxies)
-        return self.proxies[self.index]
+        return proxy
+
 
 class ProxyPool(ProxyPoolModel):
-    def __init__(self, tag: str, proxies: List[Proxy], strategy: PoolStrategyEnum, custom_strategy=None):
-        super().__init__(tag, proxies, strategy)
+    def __init__(
+        self,
+        tag: str,
+        proxies: List[Proxy],
+        strategy: PoolStrategyEnum,
+    ):
+        super().__init__(
+            tag=tag,
+            proxies=proxies,
+            strategy=strategy,
+        )
+
         match strategy:
             case PoolStrategyEnum.round_robin:
-                self.strategy = RoundRobin(proxies)
+                self._strategy = RoundRobin(proxies)
             case PoolStrategyEnum.random:
-                self.strategy = Random(proxies)
+                self._strategy = Random(proxies)
             case PoolStrategyEnum.custom:
-                self.strategy = custom_strategy(proxies)
+                raise NotImplementedError("Custom strategy is not implemented yet")
 
-    def get_proxy(self, tag: str) -> Proxy:
-        return self.strategy.get_proxy()
-
+    def get_proxy(self) -> Proxy:
+        return self._strategy.get_proxy()
