@@ -72,7 +72,7 @@ class ConfigModel(BaseModel):
     log: LoggingSettings
     routing: List[RoutingRule]
     proxies: List[Proxy]
-    pools:  Dict[str, ProxyPool]
+    pools: List[ProxyPoolModel]
 
     @model_validator(mode="after")
     def finalize_config(value: ConfigModel) -> ConfigModel:
