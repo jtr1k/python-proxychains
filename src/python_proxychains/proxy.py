@@ -1,7 +1,7 @@
 import random
 from typing import List
 
-from .config_models import PoolStrategyEnum, Proxy, ProxyPoolModel
+from .config_models import PoolStrategyEnum, Proxy
 
 
 class ProxyStrategy:
@@ -30,26 +30,26 @@ class RoundRobin(ProxyStrategy):
         return proxy
 
 
-class ProxyPool(ProxyPoolModel):
+class ProxyPool:
     def __init__(
         self,
         tag: str,
         proxies: List[Proxy],
         strategy: PoolStrategyEnum,
     ):
-        super().__init__(
-            tag=tag,
-            proxies=proxies,
-            strategy=strategy,
-        )
+        self.tag = tag
+        self.proxies = proxies
+        self.strategy_name = strategy
 
         match strategy:
             case PoolStrategyEnum.round_robin:
-                self._strategy = RoundRobin(proxies)
+                self.strategy = RoundRobin(proxies)
             case PoolStrategyEnum.random:
-                self._strategy = Random(proxies)
+                self.strategy = Random(proxies)
             case PoolStrategyEnum.custom:
                 raise NotImplementedError("Custom strategy is not implemented yet")
+            case _:
+                raise ValueError(f"Unknown proxy pool strategy: {strategy}")
 
     def get_proxy(self) -> Proxy:
-        return self._strategy.get_proxy()
+        return self.strategy.get_proxy()
