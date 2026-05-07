@@ -64,7 +64,7 @@ class PoolStrategyEnum(str, Enum):
 
 class ProxyPoolModel(BaseModel):
     tag: str
-    proxies: List[Proxy]
+    proxies: List[str]
     strategy: PoolStrategyEnum
 
 
