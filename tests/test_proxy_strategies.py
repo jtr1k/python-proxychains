@@ -5,7 +5,11 @@ from python_proxychains.proxy import ProxyPool, Random, RoundRobin
 
 
 def p(tag, port):
-    return Proxy(tag=tag, protocol=ProxyProtoEnum.http, url=f"http://127.0.0.1:{port}")
+    return Proxy(
+        tag=tag,
+        protocol=ProxyProtoEnum.http,
+        url=f"http://127.0.0.1:{port}",
+    )
 
 
 def test_round_robin_strategy():
@@ -21,11 +25,13 @@ def test_random_strategy(monkeypatch):
     assert Random(proxies).get_proxy().tag == "p2"
 
 
-def test_proxy_pool_round_robin_and_stores_proxy_objects():
+def test_proxy_pool_round_robin():
     proxies = [p("p1", 8081), p("p2", 8082)]
     pool = ProxyPool("pool", proxies, PoolStrategyEnum.round_robin)
 
+    assert pool.tag == "pool"
     assert pool.proxies == proxies
+    assert pool.strategy_name == PoolStrategyEnum.round_robin
     assert [pool.get_proxy().tag for _ in range(3)] == ["p1", "p2", "p1"]
 
 
