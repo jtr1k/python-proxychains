@@ -1,7 +1,8 @@
 from .proxy import ProxyPool
 
 
-class Config:
+class Config(ConfigModel):
+    
     def get_rules(self):
         pass
 

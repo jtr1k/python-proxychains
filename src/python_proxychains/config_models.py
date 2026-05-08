@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Annotated, List, Optional, Pattern
+from typing import Annotated, List, Optional, Pattern, Dict
 import ipaddress
 
 
@@ -55,7 +55,6 @@ class RoutingRule(BaseModel):
     ip: Optional[List[IpNetwork]] = None
     outbound: str
 
-
 class ProxyProtoEnum(str, Enum):
     socks5 = "socks5"
     socks5h = "socks5h"
@@ -73,6 +72,7 @@ class Proxy(BaseModel):
 class PoolStrategyEnum(str, Enum):
     round_robin = "RoundRobin"
     random = "Random"
+    custom = "Custom"
 
 
 class ProxyPoolModel(BaseModel):
