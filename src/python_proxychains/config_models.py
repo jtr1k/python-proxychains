@@ -1,6 +1,8 @@
 import re
 from enum import Enum
 from typing import Annotated, List, Optional, Pattern
+import ipaddress
+
 
 from pydantic import (
     AnyUrl,
@@ -10,6 +12,7 @@ from pydantic import (
     model_validator,
 )
 from pydantic_extra_types.country import CountryAlpha2
+from pydantic.networks import IPvAnyNetwork
 
 
 class LogLevelEnum(str, Enum):
@@ -34,12 +37,22 @@ def compile_regex(value: str | Pattern[str]) -> Pattern[str]:
         raise ValueError(f"Invalid regex: {e}") from e
 
 
-CompiledRegex = Annotated[Pattern[str], BeforeValidator(compile_regex)]
+def wrap_country_code(value) -> str:
+    return str(CountryAlpha2(value))
 
+
+def wrap_ip_network(value) -> ipaddress.ip_network:
+    return ipaddress.ip_network(str(IPvAnyNetwork(value)))
+
+
+CompiledRegex = Annotated[Pattern[str], BeforeValidator(compile_regex)]
+CountryCode = Annotated[str, BeforeValidator(wrap_country_code)]
+IpNetwork = Annotated[ipaddress.IPv4Network, BeforeValidator(wrap_ip_network)]
 
 class RoutingRule(BaseModel):
     domain: Optional[List[CompiledRegex]] = None
-    geoip: Optional[List[CountryAlpha2]] = None
+    geoip: Optional[List[CountryCode]] = None
+    ip: Optional[List[IpNetwork]] = None
     outbound: str
 
 
