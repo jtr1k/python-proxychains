@@ -1,6 +1,6 @@
 from python_proxychains.config_models import LogLevelEnum, ProxyProtoEnum, Config
 
-SAMPLE_CONFIG = "sample_config.json"
+SAMPLE_CONFIG = "tests/sample_config.json"
 
 
 def test_config_from_json_loads_basic_fields():
