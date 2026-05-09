@@ -1,10 +1,16 @@
 import pytest
 
-from python_proxychains.config_models import PoolStrategyEnum, Proxy, ProxyProtoEnum
-from python_proxychains.proxy import ProxyPool, Random, RoundRobin
+from python_proxychains.config_models import (
+    PoolStrategyEnum,
+    Proxy,
+    ProxyPool,
+    ProxyProtoEnum,
+    Random,
+    RoundRobin,
+)
 
 
-def p(tag, port):
+def make_proxy(tag: str, port: int) -> Proxy:
     return Proxy(
         tag=tag,
         protocol=ProxyProtoEnum.http,
@@ -12,29 +18,55 @@ def p(tag, port):
     )
 
 
-def test_round_robin_strategy():
-    s = RoundRobin([p("p1", 8081), p("p2", 8082)])
+def test_round_robin_returns_proxies_in_order():
+    strategy = RoundRobin([
+        make_proxy("proxy1", 8081),
+        make_proxy("proxy2", 8082),
+    ])
 
-    assert [s.get_proxy().tag for _ in range(3)] == ["p1", "p2", "p1"]
-
-
-def test_random_strategy(monkeypatch):
-    proxies = [p("p1", 8081), p("p2", 8082)]
-    monkeypatch.setattr("python_proxychains.proxy.random.choice", lambda items: items[1])
-
-    assert Random(proxies).get_proxy().tag == "p2"
+    assert strategy.get_proxy().tag == "proxy1"
+    assert strategy.get_proxy().tag == "proxy2"
+    assert strategy.get_proxy().tag == "proxy1"
 
 
-def test_proxy_pool_round_robin():
-    proxies = [p("p1", 8081), p("p2", 8082)]
-    pool = ProxyPool("pool", proxies, PoolStrategyEnum.round_robin)
+def test_random_returns_selected_proxy(monkeypatch):
+    proxies = [
+        make_proxy("proxy1", 8081),
+        make_proxy("proxy2", 8082),
+    ]
 
-    assert pool.tag == "pool"
+    monkeypatch.setattr(
+        "python_proxychains.config_models.random.choice",
+        lambda items: items[1],
+    )
+
+    assert Random(proxies).get_proxy().tag == "proxy2"
+
+
+def test_proxy_pool_uses_round_robin_strategy():
+    proxies = [
+        make_proxy("proxy1", 8081),
+        make_proxy("proxy2", 8082),
+    ]
+
+    pool = ProxyPool(
+        tag="pool1",
+        proxies=proxies,
+        strategy=PoolStrategyEnum.round_robin,
+    )
+
+    assert pool.tag == "pool1"
     assert pool.proxies == proxies
     assert pool.strategy_name == PoolStrategyEnum.round_robin
-    assert [pool.get_proxy().tag for _ in range(3)] == ["p1", "p2", "p1"]
+    assert pool.get_proxy().tag == "proxy1"
+    assert pool.get_proxy().tag == "proxy2"
+    assert pool.get_proxy().tag == "proxy1"
 
 
-def test_empty_proxy_list_is_invalid():
+def test_proxy_pool_rejects_empty_proxy_list():
     with pytest.raises(ValueError, match="empty"):
-        ProxyPool("pool", [], PoolStrategyEnum.random)
+        ProxyPool(
+            tag="pool1",
+            proxies=[],
+            strategy=PoolStrategyEnum.random,
+        )
