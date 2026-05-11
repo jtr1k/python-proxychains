@@ -12,6 +12,10 @@ class Router:
         self.config = config
 
     @staticmethod
+    def from_json(path: str) -> "Router":
+        return Router(Config.from_json(path))
+
+    @staticmethod
     def _extract_host(url: str) -> str:
         parsed = urlsplit(url)
         host = parsed.hostname
