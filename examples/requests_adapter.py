@@ -8,4 +8,4 @@ adapter = RoutingProxyAdapter.from_json("config.json")
 s.mount("https://", adapter)
 
 s.get("https://2ip.ru")
-s.get("https://ip.ipapi.is")
+s.get("https://api.ipapi.is")
