@@ -32,3 +32,7 @@ class RoutingProxyAdapter(HTTPAdapter):
         }
 
         return super().send(request, **kwargs)
+
+    @staticmethod
+    def from_json(path: str) -> "RoutingProxyAdapter":
+        return RoutingProxyAdapter(Router.from_json(path))

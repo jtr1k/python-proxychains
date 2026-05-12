@@ -22,6 +22,7 @@ build-backend = "uv_build"
 dev = [
     "coverage>=7.13.5",
     "pytest>=9.0.3",
+    "requests>=2.34.0",
 ]
 
 [tool.black]
