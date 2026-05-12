@@ -1,15 +1,77 @@
 # pyproxychains
 
-## Идея проекта
+... потому что иногда нужно, чтобы запросы просто начали проходить.
 
-`pyproxychains` — python-библиотека для маршрутизации http-запросов через прокси.  
-Подразумевается возможность выбора прокси по правилам пользователей. 
-Например, выбор прокси может зависеть от домена, метода запроса или приоритета.  
-Если прокси недоступна или запрос завершается ошибкой, система должна автоматически переключаться на резервную прокси.  
+## Интерфейс
 
-## Тестирование
+```py
+from python_proxychains import RoutingProxyAdapter
+
+adapter = RoutingProxyAdapter.from_json("config.json")
+
+# Decorator API
+from python_proxychains.requests import proxied
+
+import requests
+
+@proxied(adapter)
+def make_request():
+    return requests.get("https://example.com")
+
+make_request()
+```
+
+Больше примеров в [examples](./examples).
+
+## Конфигурация
+
+```json
+{
+    "log": {
+        "loglevel": "info"
+    },
+    "routing": [
+        {
+            "domain": [
+                ".*\\.ru"
+            ],
+            "outbound": "direct"
+        }
+    ],
+    "proxies": [
+        {
+            "tag": "proxy1",
+            "protocol": "socks5",
+            "url": "socks5://localhost:10808"
+        },
+        {
+            "tag": "direct",
+            "protocol": "freedom"
+        }
+    ],
+    "pools": [
+        {
+            "tag": "pool1",
+            "proxies": [
+                "proxy1",
+            ],
+            "strategy": "RoundRobin"
+        }
+    ]
+}
+```
+
+## Разработка и тестирование
 
 ```bash
+# Сборка библиотеки
+uv build
+
+# Запуск форматтеров
+uv run black
+uv run isort
+
+# Тестирование
 uv run pytest
 
 # Проверка покрытия
@@ -17,41 +79,7 @@ uv run coverage run -m pytest
 uv run coverage report
 ```
 
-## Пример желаемого интерфейса
-
-```python
-from pyproxychains import Router, RoutingProxyAdapter
-import requests
-
-router = Router.from_json("config.json")
-
-requests.get("https://openai.com", RoutingProxyAdapter(router))
-```
-
-Предполагается, что библиотека позволит описывать правила маршрутизации в удобном виде и применять их через конфиг, декоратор или объект с настройками.
 
 ## Участники
 
 Проект выполняется Лагутиным Георгием и Заборовым Егором.
-
-## Итерация 1
-
-- Реализовать класс Config, отвечающий за парсинг конфигурации
-- Реализовать класс ProxyObject, инкапсулирующий функционал прокси
-- Реализовать класс ProxyPool, отвечающий за выбор одной прокси из пула по разным критериям
-- Реализовать класс Router, принимающий конфиг и прокси, и позволяющий маршрутизировать трафик по правилам
-- Реализовать класс RoutingProxyAdapter, реализующий HTTPAdapter из urllib3, чтобы использовать его с requests/другими urllib3-based библиотеками
-
-## Итерация 2
-
-- Добавить отслеживание состояния прокси и временное исключение неработающих узлов
-- Добавить логирование и базовую статистику по работе прокси
-- Реализовать cli для проверки конфигурации и прокси
-- TBD
-
-## Используемые библиотеки
-
-- urllib3
-- requests
-- niquests
-- TBD
